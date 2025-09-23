@@ -16,3 +16,5 @@ Kullanılan veri seti, Kaggle üzerinde bulunan Airbus uçak görsellerinden olu
 
  Elde Edilen Sonuçlar:
 Model, test veri setinde %XX doğruluk oranına ulaşmıştır. Özellikle [örnek olarak belirtmek istediğin güçlü veya zayıf olduğu noktalar] performans göstermiştir. Bu sonuçlar, Airbus uçaklarının görüntüler üzerinden başarılı bir şekilde sınıflandırılabileceğini göstermektedir.
+
+https://www.kaggle.com/code/zeynepersoy/eda-airbus-aircraft-detection-dataset-sample
