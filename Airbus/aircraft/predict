@@ -310,7 +310,110 @@ for k, row in df[df['image_id'] == os.path.basename(pickone)].iterrows():
 display(img)
 #img.save('/kaggle/working/' + os.path.basename(pickone))
 
- 
+ 1. Eksik Değer Analizi
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+missing = pd.DataFrame(df.isna().sum()).rename(columns={0:"Miss_values"})
+missing["Miss_Percent"] = missing["Miss_values"] / len(df)
+
+print(missing.head())
+
+only_miss_val = missing[missing["Miss_values"] > 0]
+
+plt.figure(figsize=(8,4))
+sns.barplot(data=only_miss_val, y=only_miss_val.index, x="Miss_values")
+plt.title("Eksik Değerlerin Sayısı")
+plt.xlabel("Eksik Değer Sayısı")
+plt.tight_layout()
+plt.show()
+
+2. Çoğaltılmış Kayıtlar (Duplicate) Kontrolü
+print("Çoğaltılmış kayıt sayısı:", df.duplicated().sum())
+
+3. Her Kolondaki Benzersiz Değerlerin Sayısı
+def unique_values(df):
+    for col in df.columns:
+        print(f"{col} kolonundaki benzersiz değer sayısı: {df[col].nunique()}")
+        print("=="*20)
+
+unique_values(df)
+
+4. Özet İstatistikler
+def get_summary(df):
+    df_desc = pd.DataFrame(df.describe(include='all').T)
+    df_summary = pd.DataFrame({
+        'dtype': df.dtypes,
+        'Count': df.count(),
+        'unique': df.nunique(),
+        'missing': df.isna().sum(),
+        'duplicated': df.duplicated().sum(),
+        'mean': df_desc['mean'].values,
+        'min': df_desc['min'].values,
+        'std': df_desc['std'].values,
+        '25%': df_desc['25%'].values,
+        '50%': df_desc['50%'].values,
+        '75%': df_desc['75%'].values,
+        'max': df_desc['max'].values
+    })
+    return df_summary.style.background_gradient(cmap='YlGnBu', subset=['mean','std','min','25%','50%','75%','max']).set_properties(**{'border': '1.5px solid black'})
+
+get_summary(df)
+
+5. Sayısal ve Kategorik Değişkenlerin Ayrılması
+numerical_columns = [col for col in df.columns if df[col].dtype in ['float64', 'int64']]
+categorical_columns = [col for col in df.columns if df[col].dtype == 'object']
+
+print(f"Sayısal kolonlar: {numerical_columns}")
+print(f"Kategorik kolonlar: {categorical_columns}")
+
+6. Hedef Değişken Dağılımı (Örnek: Uçak Fiyatı)
+fig = plt.figure(figsize=(12,6))
+
+box_axes = fig.add_axes([0.1, 0.1, 0.35, 0.8])
+sns.kdeplot(x=df["Fiyat"], color='blue', ax=box_axes)
+box_axes.set_title('KDE Plot')
+box_axes.set_xlabel('Fiyat')
+
+hist_axes = fig.add_axes([0.55, 0.1, 0.35, 0.8])
+sns.histplot(df["Fiyat"], kde=False, color='#967bb6', ax=hist_axes)
+hist_axes.set_title('Dağılım')
+hist_axes.set_xlabel('Fiyat')
+hist_axes.set_ylabel('Frekans')
+
+plt.show()
+
+7. Korelasyon Matrisi ve Heatmap
+import numpy as np
+
+corr_matrix = df.corr(numeric_only=True)
+mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+
+plt.figure(figsize=(10,8))
+sns.heatmap(corr_matrix, mask=mask, annot=True, fmt=".3f", cmap='coolwarm', vmin=-1, vmax=1, linewidths=0.5, cbar_kws={'shrink':0.8})
+plt.title("Korelasyon Matrisi")
+plt.tight_layout()
+plt.show()
+
+8. Örneğin, Motor Gücü ve Fiyat İlişkisi Scatterplot
+sns.scatterplot(data=df, x="Motor_Gucu", y="Fiyat", hue="Ucak_Tipi", palette="tab10")
+plt.title("Motor Gücü ve Fiyat İlişkisi")
+plt.xlabel("Motor Gücü")
+plt.ylabel("Fiyat")
+plt.legend(title="Uçak Tipi")
+plt.show()
+
+9. Segmentasyon Örneği: Fiyat Segmentlerine Göre Ortalama Performans
+df['Fiyat_Grubu'] = pd.cut(df['Fiyat'], bins=[0, 500000, 1000000, 2000000, 5000000], labels=['Düşük', 'Orta', 'Yüksek', 'Premium'])
+avg_performance = df.groupby('Fiyat_Grubu')['Performans_Skoru'].mean()
+
+avg_performance.plot(kind='bar', color='skyblue')
+plt.title('Fiyat Gruplarına Göre Ortalama Performans')
+plt.xlabel('Fiyat Grubu')
+plt.ylabel('Ortalama Performans Skoru')
+plt.xticks(rotation=0)
+plt.show()
 
 
 
