@@ -1,110 +1,106 @@
-Predict Aircraft Age and Value – Exploratory Data Analysis (EDA)
 Project Summary:
-
-This project focuses on Exploratory Data Analysis (EDA) to understand the relationship between various features of Airbus aircraft and their impact on the aircraft’s age and estimated value. The “Airbus Aircrafts Dataset” was used to explore how technical, operational, and categorical characteristics influence aircraft lifecycle and market value. Both categorical and numerical features were analyzed using statistical summaries and visualizations.
+This project focuses on exploring the relationship between various features of Airbus aircraft and their impact on the aircraft’s age and estimated market value. Using the Airbus Aircraft Dataset, which contains technical specifications, operational data, and categorical variables, the analysis uncovers patterns affecting aircraft lifecycle and depreciation. Both numerical and categorical variables were examined through statistical summaries and visualizations.
 
 About the Dataset:
-
-The dataset includes records of different Airbus aircraft types, including metadata and technical specifications. It contains aircraft registration information, model, production year, number of engines, number of seats, operator, status (active/stored/retired), and more.
+The dataset includes information such as aircraft model, production year, number of engines, seating capacity, operator, operational status (active, stored, retired), and other metadata.
 
 Key Features:
 
-Model:
-The aircraft model (e.g., A320, A330, A350, A380).
+Model (e.g., A320, A330)
 
-Status:
-Operational status of the aircraft (active, parked, retired).
+Status (active, parked, retired)
 
-First_flight:
-Year of the aircraft’s first flight. Used to compute the age of the aircraft.
+First flight year (used to calculate age)
 
-Engines:
-Number of engines installed on the aircraft.
+Number of engines
 
-Seats:
-Estimated seating capacity of the aircraft.
+Seating capacity
 
-Aircraft_type:
-Passenger or cargo aircraft.
+Aircraft type (passenger or cargo)
 
-Operator:
-Airline or company operating the aircraft.
+Operator
 
-Age:
-Calculated from the current year minus the first flight year.
+Age (calculated as current year minus first flight year)
 
-Value (estimated):
-Target variable representing the aircraft’s estimated market value (if available or derived).
+Estimated value (target variable)
 
 Objective:
-
-The main objective of this project is to analyze the relationship between aircraft age and estimated value, and determine which features have the most significant influence on these variables. Additionally, this EDA aims to identify missing data, outliers, and patterns within the dataset.
+To analyze how aircraft age and estimated value relate to various features, identify influential factors, and detect missing data and outliers.
 
 Studies Conducted:
-1. Data Cleaning and Preprocessing
 
-Checked for missing or inconsistent entries (e.g., missing production years or engine counts).
+Data cleaning and preprocessing to handle missing values and outliers
 
-Converted categorical variables (e.g., model names, operator names) into appropriate formats.
+Feature engineering including calculation of aircraft age and grouping models
 
-Parsed and transformed date fields into usable features such as aircraft age.
+Exploratory Data Analysis using statistical summaries and visualizations
 
-Removed or flagged outliers in seating capacity, engine count, or anomalous production years.
+Correlation analysis among numerical variables
 
-2. Feature Engineering
-
-Calculated aircraft age as: Age = Current Year - First Flight Year.
-
-Classified aircraft status into operational categories.
-
-Grouped aircraft models based on size or range.
-
-3. Exploratory Data Analysis
-
-Summary statistics (mean, median, standard deviation) for age, seat capacity, engines, etc.
-
-Visualizations for categorical variables such as model distribution, aircraft status, and operator frequencies.
-
-Correlation heatmap among numerical features (age, seats, engines, estimated value).
-
-Distribution analysis of aircraft age across different models and statuses.
-
-4. Visualizations
-
-Histograms of aircraft age and seat count.
-
-Boxplots comparing value across aircraft models or types.
-
-Bar charts showing the number of aircraft per operator or status.
-
-Scatter plots to show relationships between age and value, or seats and value.
-
-5. Statistical Analysis
-
-ANOVA tests to compare aircraft value across different models or engine counts.
-
-Correlation analysis between age, seating capacity, and value.
-
-Regression line plots to analyze linear trends (e.g., how age affects aircraft value).
+Statistical tests (ANOVA) to compare value across models and engine counts
 
 Results:
 
-Aircraft age is strongly associated with its operational status — newer aircraft are more likely to be active, while older ones are retired or stored.
+Aircraft age strongly correlates with operational status; newer aircraft are typically active, older ones retired or stored
 
-Seating capacity and model type are good predictors of aircraft size and likely market value.
+Seating capacity and model type are good predictors of aircraft size and value
 
-A negative correlation was observed between aircraft age and value, indicating depreciation over time.
+Negative correlation between age and estimated value shows depreciation over time
 
-Models like the A320 series showed a wide distribution of ages, while newer models like A350 were mostly under 10 years old.
+Wide age distribution observed in models like A320, whereas newer models such as A350 are mostly under 10 years old
 
 Conclusions:
+The analysis provides insights into how Airbus aircraft characteristics influence their operational lifecycle and market value, offering useful information for fleet planning and acquisition decisions.
 
-This EDA reveals key insights into how Airbus aircraft characteristics affect their operational lifecycle and value. Understanding these patterns can assist airline companies, lessors, and buyers in making informed decisions regarding fleet planning, acquisitions, and retirements.
+Uçak Yaşı ve Değerinin Tahmini – Keşifsel Veri Analizi (EDA)
 
-Next Steps:
+Proje Özeti:
+Bu proje, Airbus uçaklarının çeşitli özellikleri ile uçak yaşı ve tahmini piyasa değeri arasındaki ilişkiyi keşfetmeye odaklanmıştır. Teknik özellikler, operasyonel veriler ve kategorik değişkenlerden oluşan Airbus Uçak Veri Seti kullanılarak, uçakların yaşam döngüsünü ve değer kaybını etkileyen desenler ortaya çıkarılmıştır. Sayısal ve kategorik değişkenler istatistiksel özetler ve görselleştirmelerle incelenmiştir.
 
-Use the findings as a basis for predictive modeling (e.g., regression or tree-based algorithms) to estimate aircraft value or predict remaining useful life.
+Veri Seti Hakkında:
+Veri setinde uçak modeli, üretim yılı, motor sayısı, koltuk kapasitesi, operatör, operasyon durumu (aktif, parkta, emekli) ve diğer metadata bilgileri bulunmaktadır.
 
-Enhance feature engineering by incorporating external data (e.g., fuel efficiency, maintenance cost, utilization rate).
+Anahtar Özellikler:
 
-Build a Streamlit or Dash application where users can input aircraft features to estimate value or lifespan.
+Model (örn. A320, A330)
+
+Durum (aktif, parkta, emekli)
+
+İlk uçuş yılı (yaş hesaplamasında kullanılır)
+
+Motor sayısı
+
+Koltuk kapasitesi
+
+Uçak tipi (yolcu veya kargo)
+
+Operatör
+
+Yaş (güncel yıldan ilk uçuş yılı çıkarılarak hesaplanır)
+
+Tahmini değer (hedef değişken)
+
+Amaç:
+Uçak yaşı ve tahmini değerin çeşitli özelliklerle ilişkisini analiz etmek, etkili faktörleri belirlemek ve eksik veri ile aykırı değerleri tespit etmektir.
+
+Yapılan Çalışmalar:
+
+Eksik ve aykırı verilerin temizlenmesi ve ön işlenmesi
+
+Uçak yaşı hesaplanması ve model sınıflandırması gibi özellik mühendisliği
+
+İstatistiksel özetler ve görselleştirmeler ile keşifsel veri analizi
+
+Sayısal değişkenler arasında korelasyon analizi
+
+Farklı model ve motor sayıları arasında değer karşılaştırması için ANOVA testi
+
+Sonuçlar:
+
+Uçak yaşı ile operasyon durumu arasında güçlü ilişki; yeni uçaklar genellikle aktif, eski uçaklar emekli veya parkta
+
+Koltuk kapasitesi ve model tipi, uçak büyüklüğü ve değerinin iyi göstergeleri
+
+Yaş ile tahmini değer arasında negatif korelasyon, zamanla değer kaybını gösterir
+
+A320 gibi modellerde geniş yaş dağılımı, A350 gibi yeni modellerde ise çoğunlukla 10 yaş altı yoğunluk gözlenmiştir
