@@ -103,4 +103,216 @@ Koltuk kapasitesi ve model tipi, uçak büyüklüğü ve değerinin iyi gösterg
 
 Yaş ile tahmini değer arasında negatif korelasyon, zamanla değer kaybını gösterir
 
-A320 gibi modellerde geniş yaş dağılımı, A350 gibi yeni modellerde ise çoğunlukla 10 yaş altı yoğunluk gözlenmiştir
+A320 gibi modellerde geniş yaş dağılımı, A350 gibi yeni modellerde ise çoğunlukla 10 yaş altı yoğunluk gözlenmiştir   
+
+
+Import Libraries
+
+import random
+import numpy as np
+
+def set_global_random_seed(seed: int = 42):
+    """Sets a global random seed for reproducibility across various libraries."""
+    random.seed(seed)        # Python random modülü
+    np.random.seed(seed)     # NumPy random modülü
+
+# Seed Ayarlama
+set_global_random_seed(seed=7)
+
+# Sonrasında senin diğer importlar ve kodların devam eder
+import pandas as pd # Data Manipulation
+import matplotlib.pyplot as plt
+import seaborn as sns
+import joblib
+from sklearn.metrics import r2_score
+import xgboost as xgb
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
+import warnings
+warnings.filterwarnings("ignore") 
+
+
+Load and Read Dataset
+
+data = pd.read_csv("/kaggle/input/airbus-aircraft-dataset/airbus_aircrafts.csv")
+
+
+
+
+First Look at the Dataset
+
+def add_random_missing_values_aircraft(dataframe: pd.DataFrame,
+                                      missing_rate: float = 0.05,
+                                      random_state: int = 42,
+                                      exclude_columns: list = None) -> pd.DataFrame:
+    """Add random missing values (NaN) to a dataframe excluding specified columns."""
+
+    np.random.seed(random_state)
+    df_missing = dataframe.copy()
+
+    if exclude_columns:
+        columns_to_include = [col for col in dataframe.columns if col not in exclude_columns]
+    else:
+        columns_to_include = dataframe.columns.tolist()
+
+    if not columns_to_include:
+        raise ValueError("All columns excluded, no missing values can be added.")
+
+    df_size = len(columns_to_include) * dataframe.shape[0]
+    num_missing = int(df_size * missing_rate)
+
+    included_col_indices = [dataframe.columns.get_loc(col) for col in columns_to_include]
+
+    row_indices = np.random.randint(0, dataframe.shape[0], num_missing)
+    col_indices = np.random.choice(included_col_indices, num_missing)
+
+    for row_idx, col_idx in zip(row_indices, col_indices):
+        df_missing.iat[row_idx, col_idx] = np.nan
+
+    return df_missing
+
+
+# Örnek kullanım:
+# exclude_columns olarak 'model', 'operator' gibi kategorik sütunları veya değiştirmek istemediklerini verebilirsin
+df_aircraft_missing = add_random_missing_values_aircraft(data, missing_rate=0.05, random_state=42, exclude_columns=['model', 'operator', 'status'])
+
+# Veri setinden örnekler
+print(df_aircraft_missing.head())
+print(df_aircraft_missing.tail())
+print(df_aircraft_missing.sample(10))
+
+# Veri hakkında genel bilgi
+print("Veri Setinin Boyutu: ", df_aircraft_missing.shape)
+df_aircraft_missing.info()
+
+
+# This Python 3 environment comes with many helpful analytics libraries installed
+# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python
+# For example, here's several helpful packages to load
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+# Input data files are available in the read-only "../input/" directory
+# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+
+from pathlib import Path
+
+DATA_DIR = Path('../input/airbus-aircrafts-sample-dataset')
+img_list = list(DATA_DIR.glob('images/*.jpg'))
+print("Number of images: {}".format(len(img_list)))
+#print(*img_list, sep = "\n")
+
+# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
+# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+Number of images: 103
+import random
+import PIL
+
+pickone = random.choice(img_list)
+img = PIL.Image.open(pickone)
+print(img.size)
+display(img)
+(2560, 2560)
+
+import ast
+
+# convert a string record into a valid python object
+def f(x): 
+    return ast.literal_eval(x.rstrip('\r\n'))
+
+df = pd.read_csv(DATA_DIR / "annotations.csv", 
+                converters={'geometry': f})
+df.head(10)
+id	image_id	geometry	class
+0	1	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(135, 522), (245, 522), (245, 600), (135, 600...	Airplane
+1	2	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1025, 284), (1125, 284), (1125, 384), (1025,...	Airplane
+2	3	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1058, 1503), (1130, 1503), (1130, 1568), (10...	Airplane
+3	4	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(813, 1518), (885, 1518), (885, 1604), (813, ...	Airplane
+4	5	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(594, 938), (657, 938), (657, 1012), (594, 10...	Airplane
+5	6	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(451, 725), (524, 725), (524, 798), (451, 798...	Airplane
+6	7	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1543, 1437), (1614, 1437), (1614, 1497), (15...	Airplane
+7	8	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1485, 1370), (1561, 1370), (1561, 1437), (14...	Airplane
+8	9	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1968, 1624), (2053, 1624), (2053, 1687), (19...	Airplane
+9	10	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1659, 1674), (1733, 1674), (1733, 1746), (16...	Airplane
+def getBounds(geometry):
+    try: 
+        arr = np.array(geometry).T
+        xmin = np.min(arr[0])
+        ymin = np.min(arr[1])
+        xmax = np.max(arr[0])
+        ymax = np.max(arr[1])
+        return (xmin, ymin, xmax, ymax)
+    except:
+        return np.nan
+
+def getWidth(bounds):
+    try: 
+        (xmin, ymin, xmax, ymax) = bounds
+        return np.abs(xmax - xmin)
+    except:
+        return np.nan
+
+def getHeight(bounds):
+    try: 
+        (xmin, ymin, xmax, ymax) = bounds
+        return np.abs(ymax - ymin)
+    except:
+        return np.nan
+
+# Create bounds, width and height
+df.loc[:,'bounds'] = df.loc[:,'geometry'].apply(getBounds)
+df.loc[:,'width'] = df.loc[:,'bounds'].apply(getWidth)
+df.loc[:,'height'] = df.loc[:,'bounds'].apply(getHeight)
+
+# Display head
+df.head(10)
+id	image_id	geometry	class	bounds	width	height
+0	1	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(135, 522), (245, 522), (245, 600), (135, 600...	Airplane	(135, 522, 245, 600)	110	78
+1	2	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1025, 284), (1125, 284), (1125, 384), (1025,...	Airplane	(1025, 284, 1125, 384)	100	100
+2	3	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1058, 1503), (1130, 1503), (1130, 1568), (10...	Airplane	(1058, 1503, 1130, 1568)	72	65
+3	4	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(813, 1518), (885, 1518), (885, 1604), (813, ...	Airplane	(813, 1518, 885, 1604)	72	86
+4	5	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(594, 938), (657, 938), (657, 1012), (594, 10...	Airplane	(594, 938, 657, 1012)	63	74
+5	6	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(451, 725), (524, 725), (524, 798), (451, 798...	Airplane	(451, 725, 524, 798)	73	73
+6	7	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1543, 1437), (1614, 1437), (1614, 1497), (15...	Airplane	(1543, 1437, 1614, 1497)	71	60
+7	8	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1485, 1370), (1561, 1370), (1561, 1437), (14...	Airplane	(1485, 1370, 1561, 1437)	76	67
+8	9	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1968, 1624), (2053, 1624), (2053, 1687), (19...	Airplane	(1968, 1624, 2053, 1687)	85	63
+9	10	4f833867-273e-4d73-8bc3-cb2d9ceb54ef.jpg	[(1659, 1674), (1733, 1674), (1733, 1746), (16...	Airplane	(1659, 1674, 1733, 1746)	74	72
+unique, counts = np.unique(df['class'], return_counts=True)
+pd.DataFrame({'class': unique, 'count': counts})
+class	count
+0	Airplane	3316
+1	Truncated_airplane	109
+unique, counts = np.unique(df['image_id'], return_counts=True)
+#per_image = np.asarray((unique, counts)).T
+print("Minimum aircrafts per image: {}".format(np.min(counts)))
+print("Maximum aircrafts per image: {}".format(np.max(counts)))
+Minimum aircrafts per image: 5
+Maximum aircrafts per image: 92
+import seaborn as sns
+sns.displot(df['width'])
+<seaborn.axisgrid.FacetGrid at 0x7f4848379250>
+
+sns.displot(df['height'])
+<seaborn.axisgrid.FacetGrid at 0x7f482ba2b550>
+
+import os.path
+import PIL.ImageDraw
+
+pickone = random.choice(img_list)
+img = PIL.Image.open(pickone)
+draw = PIL.ImageDraw.Draw(img)
+
+for k, row in df[df['image_id'] == os.path.basename(pickone)].iterrows():
+    draw.polygon(row['geometry'], outline=(255,0,0))
+    draw.text(row['geometry'][0], row['class'], fill=(255,0,0))
+
+display(img)
+#img.save('/kaggle/working/' + os.path.basename(pickone))
+
+ 
+
+
+
+
+
